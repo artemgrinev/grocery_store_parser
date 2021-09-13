@@ -2,41 +2,25 @@ import requests
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
 import random
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+from key import key
 
-class GetSoup:
-    url = 'https://...'
-        
+class Response:
+    def __init__(self):
+        url = 'https://...'
+        key = ""
+
     def get_soup(self):
-        code = requests.get(self.url, headers={'User-Agent': UserAgent().chrome}).status_code
-        print(code)
-        if code != 429:
-            r = requests.get(self.url, headers={'User-Agent': UserAgent().chrome}).text
-            soup = BeautifulSoup(r)
-        else:
-            try:
-                proxy = self.get_proxy()
-                proxies = {"http": proxy, "https": proxy}
-                r = requests.get(self.url, headers={'User-Agent': UserAgent().chrome}, proxies = proxies).text
-                soup = BeautifulSoup(r)
-            except:
-                print('conection error')
-        return soup
-    
+        proxy_host = "proxy.zyte.com"
+        proxy_port = "8011"
+        proxy_auth = self.key # Make sure to include ':' at the end
+        proxies = {"https": "http://{}@{}:{}/".format(proxy_auth, proxy_host, proxy_port),
+                   "http": "http://{}@{}:{}/".format(proxy_auth, proxy_host, proxy_port)}
+        r = requests.get(self.url, proxies=proxies, verify=False).text
 
-
-    def get_proxy(self):
-        print('propxy')
-        url = 'https://hidemy.name/ru/proxy-list/?country=AFAXALADAOARAMAUATAZBDBYBZBJBTBOBABWBRBGBFBIKHCMCACVTDCLCNCOCGCDCRCIHRCWCYCZDKDMDOECEGGQEEETFIFRGMGEDEGHGRGTGNGYHNHKHUINIDIRIQIEILITJMJPKZKEKRKGLALVLBLSLRLYLTMOMKMGMWMYMVMLMTMQMRMUMXMDMNMEMZMMNANPNLNCNZNINENGNOPKPSPAPGPYPEPHPLPTPRRORURWMFWSSARSSCSLSGSKSISOZASSESSDSZSECHSYTWTJTZTHTLTGTRUGUAAEGBUSUYUZVEVNVGVIZMZW&type=hs#list'
-        r = requests.get(url, headers={'User-Agent': UserAgent().chrome}).text
         soup = BeautifulSoup(r)
-        tbody = soup.find('tbody').find_all('tr')
-        proxy_list = []
-        for tr in tbody:
-            l = []
-            for td in tr.find_all('td'):
-                l.append(td.text)
-            port = f'http://{l[0]}:{l[1]}'
-            proxy_list.append(port)
-        return random.choice(proxy_list)
+        return soup
 
-response = GetSoup()
+response = Response()
+response.key = key

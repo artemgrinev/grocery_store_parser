@@ -1,8 +1,6 @@
-from response import GetSoup
+from response import response
 import csv
 
-
-response = GetSoup()
 
 class Category:
     name = ''
@@ -41,18 +39,18 @@ class Product(Category):
     category_url = ''
     
     
-    def parser(self):
+    def get_product(self):
         for category in Category().parser():
             domain = 'https://www.okeydostavka.ru'
             response.url = domain + category.url
-            soup = response.get_soup()
+            soup = response.get_proxy()
             try:
                 products = soup.find('ul', class_ = 'grid_mode grid rows').find_all('li')
                 for i in products:
-                    if products is not None:
+                    try:
                         product_weight = i.find('div', class_ = 'product-weight').text.split()
                         response.url = domain + i.find('a').attrs['href']
-                        product_soup = response.get_soup()
+                        product_soup = response.get_proxy()
                         
                         self.market_name = 'okey'
                         self.domain = domain
@@ -68,18 +66,19 @@ class Product(Category):
                         self.category_url = category.url
                         print(f'        {self.product_name}')
                         yield self
+                    except:
+                        pass
             except:
                 pass
 
 
     def writer_csv(self):
-        file_name = self.market_name
-        with open('file_name.csv', mode='w', encoding='utf-8') as csv_file:
+        with open('okey.csv', mode='w', encoding='utf-8') as csv_file:
             fieldnames = ['market_name', 'domain', 'product_id', 'product_name', 'price',
                           'is_available', 'measure', 'product_url', 'vender_name',
                           'category_name','subcategory_name', 'category_url']
             writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-            products = self.parser()
+            products = self.get_product()
             writer.writeheader()
             for i in products:
                 writer.writerow(i.__dict__)
