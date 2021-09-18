@@ -1,12 +1,15 @@
+from product import Product
 from response import response
 import csv
 
 
 class Category:
-    name = ''
-    sub_name = ''
-    url = ''
     response.url = 'https://www.okeydostavka.ru/spb/catalog'
+
+    def __init__(self):
+        self.name = ''
+        self.sub_name = ''
+        self.url = ''
 
     def parser(self):
         soup = response.get_soup()
@@ -24,36 +27,24 @@ class Category:
                     yield self
 
 
-class Product(Category):
-    market_name = ''
-    domain = ''
-    product_id = ''
-    product_name = ''
-    price = ''
-    is_available = ''
-    measure = ''
-    product_url = ''
-    vender_name = ''
-    portal_name = ''
-    category_name = ''
-    category_url = ''
+class ProductOkey(Product):
+    def __init__(self):
+        self.market_name = 'okey'
+        self.domain = 'https://www.okeydostavka.ru'
     
     
     def get_product(self):
         for category in Category().parser():
-            domain = 'https://www.okeydostavka.ru'
-            response.url = domain + category.url
+            response.url = self.domain + category.url
             soup = response.get_proxy()
             try:
                 products = soup.find('ul', class_ = 'grid_mode grid rows').find_all('li')
                 for i in products:
                     try:
                         product_weight = i.find('div', class_ = 'product-weight').text.split()
-                        response.url = domain + i.find('a').attrs['href']
+                        response.url = self.domain + i.find('a').attrs['href']
                         product_soup = response.get_proxy()
                         
-                        self.market_name = 'okey'
-                        self.domain = domain
                         self.product_id = i.find('div', class_='product-cart').find('a').attrs['data-entry-id']
                         self.product_name = i.find('a').attrs['title']
                         self.price = i.find('div', class_='product-cart').find('a').attrs['data-price']
@@ -65,7 +56,7 @@ class Product(Category):
                         self.subcategory_name = category.sub_name
                         self.category_url = category.url
                         print(f'        {self.product_name}')
-                        yield self
+                        yield self.__dict__
                     except:
                         pass
             except:
@@ -73,12 +64,16 @@ class Product(Category):
 
 
     def writer_csv(self):
-        with open('okey.csv', mode='w', encoding='utf-8') as csv_file:
-            fieldnames = ['market_name', 'domain', 'product_id', 'product_name', 'price',
-                          'is_available', 'measure', 'product_url', 'vender_name',
+        file_name = self.market_name + '.csv'
+        print(file_name)
+        with open(file_name, mode='w', encoding='utf-8') as csv_file:
+            fieldnames = ['product_id', 'market_name', 'domain', 'product_name', 'vender_name',
+                          'price','is_available', 'measure', 'product_url',
                           'category_name','subcategory_name', 'category_url']
             writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
             products = self.get_product()
             writer.writeheader()
             for i in products:
-                writer.writerow(i.__dict__)
+                writer.writerow(i)
+            # for i in range(5):
+            #     writer.writerow(next(products))

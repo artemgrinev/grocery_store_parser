@@ -1,4 +1,14 @@
-from okey import Product
+from vprokmarket import ProductVprok
+from okey import ProductOkey
+from roscontrol import ProductRating
+from vprokmarket import ProductVprok
 
-product = Product()
-product.writer_csv()
+
+okey = ProductOkey()
+okey.writer_csv()
+
+# roscontrol = ProductRating()
+# roscontrol.writer_csv()
+
+# vprok = ProductVprok()
+# vprok.writer_csv()

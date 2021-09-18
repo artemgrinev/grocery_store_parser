@@ -1,20 +1,9 @@
 from response import response
+from product import Product
 import csv
 
 
-class Product:
-    market_name = ''
-    domain = ''
-    product_id = ''
-    product_name = ''
-    price = ''
-    is_available = ''
-    measure = ''
-    product_url = ''
-    vender_name = ''
-    portal_name = ''
-    category_name = ''
-    category_url = ''
+class ProductVprok(Product):
     
     def parser(self):
         domain = 'https://www.vprok.ru'
@@ -69,10 +58,23 @@ class Product:
                             self.category_url = product.get('data-category-url')
 
                             print('product: ' + product.get('data-owox-product-name') + ' recorded')
-                            yield self
+                            yield self.__dict__
                             
                         except AttributeError:
                             pass
                 except AttributeError:
                     pass
                 page += 1
+
+    def writer_csv(self):
+        file_name = self.market_name + '.csv'
+        print(file_name)
+        with open(file_name, mode='w', encoding='utf-8') as csv_file:
+            fieldnames = ['product_id', 'market_name', 'domain', 'product_name', 'vender_name',
+                          'price','is_available', 'measure', 'product_url',
+                          'category_name','subcategory_name', 'category_url']
+            writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+            products = self.get_product()
+            writer.writeheader()
+            for i in products:
+                writer.writerow(i)
